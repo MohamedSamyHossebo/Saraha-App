@@ -1,10 +1,10 @@
 import { resolve } from "path";
 import dotenv from "dotenv";
 const envPath = {
-    dev: "./config/.env.dev",
-    prod: "./config/.env.prod"
+    dev: "/config/.env.dev",
+    prod: "/config/.env.prod"
 }
-dotenv.config({ path: resolve(__dirname, envPath.dev) });
+dotenv.config({ path: resolve(`.${envPath.dev}`) });
 
 
 export const PORT = process.env.PORT || 5000;
