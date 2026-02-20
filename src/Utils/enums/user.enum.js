@@ -4,12 +4,10 @@ export const GENDER = {
     OTHER: 2
 }
 export const ROLE = {
-    USER: 0,
-    ADMIN: 1
+    ADMIN: 0,
+    USER: 1,
 }
 export const PROVIDER = {
-    GOOGLE: 0,
-    GITHUB: 1,
-    FACEBOOK: 2,
-    SYSTEM: 3
+    SYSTEM: 0,
+    GOOGLE: 1
 }
