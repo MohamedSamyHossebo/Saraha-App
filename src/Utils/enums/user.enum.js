@@ -10,5 +10,6 @@ export const ROLE = {
 export const PROVIDER = {
     GOOGLE: 0,
     GITHUB: 1,
-    FACEBOOK: 2
+    FACEBOOK: 2,
+    SYSTEM: 3
 }

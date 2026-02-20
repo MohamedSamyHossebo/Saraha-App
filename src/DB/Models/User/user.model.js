@@ -4,7 +4,12 @@ const userSchema = new mongoose.Schema({
     firstName: String,
     lastName: String,
     email: String,
-    password: String,
+    password: {
+        type: String,
+        required: function () {
+            return this.provider === PROVIDER.SYSTEM ? false : true;
+        }
+    },
     DOB: Date,
     phoneNumber: String,
     gender: {
@@ -24,9 +29,15 @@ const userSchema = new mongoose.Schema({
     },
     confirmEmail: Date,
     profilePic: String,
-}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
-userSchema.virtual("fullName").get(function () {
-    return `${this.firstName} ${this.lastName}`;
+},
+    {
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
+    });
+userSchema.virtual("fullName").set(function (value) {
+    this.firstName = value.split(" ")[0];
+    this.lastName = value.split(" ")[1];
 });
 
 const User = mongoose.model("User", userSchema);
