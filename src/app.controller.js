@@ -1,9 +1,10 @@
+import connectDB from "./DB/connection.js";
 import { authRouter, userRouter, messageRouter } from "./Modules/index.js"
 import { badRequest, globalErrorHandler } from "./Utils/response/error.response.js";
 
 const bootstrap = async (app, express) => {
     app.use(express.json())
-
+    await connectDB();
     app.get("/", (req, res) => {
         res.status(200).json({
             status: "success",
@@ -17,7 +18,7 @@ const bootstrap = async (app, express) => {
     app.use("/message", messageRouter)
 
     app.all("/*dummy", (req, res) => {
-       throw badRequest ({ message: "Route not found" })
+        throw badRequest({ message: "Route not found" })
 
     });
     app.use(globalErrorHandler);
