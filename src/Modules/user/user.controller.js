@@ -1,4 +1,6 @@
 import { Router } from "express";
-const router=Router();
+import * as userService from "./user.service.js";
+const router = Router();
 
+router.get("/:id", userService.profile)
 export default router;
