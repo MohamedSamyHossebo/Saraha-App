@@ -4,3 +4,4 @@ export const successResponse = ({ res, message = "Success", data = {}, statusCod
         data,
     });
 }
+export default successResponse;

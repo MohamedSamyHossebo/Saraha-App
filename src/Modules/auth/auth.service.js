@@ -1,49 +1,40 @@
-import { encrypt, decrypt } from "../../Utils/security/encryption.security.js";
+import userModel from "../../DB/Models/User/user.model.js";
 import jwt from "jsonwebtoken";
 import * as dbService from "../../DB/database.repository.js";
-import { badRequest } from "../../Utils/response/error.response.js";
-
+import { badRequest, conflict, notFound } from "../../Utils/response/error.response.js";
+import successResponse from "../../Utils/response/success.response.js";
+import { generateHash, verifyHash } from "../../Utils/security/hash.security.js";
+import { securityEnum } from "../../Utils/enums/security.enum.js";
+import { encrypt } from "../../Utils/security/encryption.security.js";
 export const createUser = async (req, res) => {
-    try {
-        const { name, email, password, age, phone } = req.body;
-        if (!name || !email || !password || !age || !phone) {
-            return res.status(400).json({ message: "All fields are required", status: "error" });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const encryptedPhone = encrypt(phone);
-        const userEmail = await dbService.findOne({ email });
-        if (userEmail) {
-            throw badRequest("Email already exists", 409);
-        }
-        const user = await dbService.create({ name, email, password: hashedPassword, age, phone: encryptedPhone });
-        const token = jwt.sign(jwtUserObject(user), jwtSecret, { expiresIn: "1d" });
-        user.token = token;
-        await user.save();
-        return res.status(201).json({ message: "User created successfully", status: "success", token });
-    } catch (error) {
-        return res.status(500).json({ message: error.message, status: "error", stack: error.stack });
+    const { firstName, lastName, email, password, DOB, phoneNumber, gender } = req.body;
+    if (!firstName || !lastName || !email || !password || !DOB || !phoneNumber || !gender) {
+        throw badRequest(res, "All fields are required");
     }
+    const existingUser = await dbService.findOne({ model: userModel, filter: { email } });
+    if (existingUser) {
+        throw conflict({ res, message: "User already exists" });
+    }
+    const encryptedData = await encrypt(phoneNumber);
+    const hashedPassword = await generateHash({ plainText: password, algo: securityEnum.ARGON2 });
+    const user = await dbService.create({ model: userModel, data: [{ firstName, lastName, email, password: hashedPassword, DOB, phoneNumber: encryptedData, gender }] });
+    return successResponse({ res, statusCode: 201, message: "User created successfully", data: user });
 }
 
 
 export const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ message: "All fields are required", status: "error" });
-        }
-        const user = await dbService.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found", status: "error" });
-        }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid password", status: "error" });
-        }
-        const token = jwt.sign(jwtUserObject(user), jwtSecret, { expiresIn: "1d" });
-        await dbService.findByIdAndUpdate(user._id, { token });
-        return res.status(200).json({ message: "User logged in successfully", status: "success", token });
-    } catch (error) {
-        return res.status(500).json({ message: error.message, status: "error", stack: error.stack });
+    const { email, password } = req.body;
+    if (!email || !password) {
+        throw badRequest({ res, message: "Email and password are required" });
     }
+    const user = await dbService.findOne({ model: userModel, filter: { email } });
+    if (!user) {
+        throw notFound({ res, message: "User not found" });
+    }
+    const isPasswordValid = await verifyHash({ plainText: password, cipherText: user.password, algo: securityEnum.ARGON2 });
+    if (!isPasswordValid) {
+        throw badRequest({ res, message: "Invalid password" });
+    }
+    return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { user } });
+
 }

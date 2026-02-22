@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 const IV_LENGTH = 16; // For AES, this is always 16 initialization vector length
-const ENCRYPTION_SECRET_KEY = "123456789012345678901234567890123";
+const ENCRYPTION_SECRET_KEY = "12345678901234567890123456789012";
 // Symmetric  encryption
 export const encrypt = async (data) => {
     const iv = crypto.randomBytes(IV_LENGTH);
