@@ -1,11 +1,12 @@
 import userModel from "../../DB/Models/User/user.model.js";
-import jwt from "jsonwebtoken";
 import * as dbService from "../../DB/database.repository.js";
 import { badRequest, conflict, notFound } from "../../Utils/response/error.response.js";
 import successResponse from "../../Utils/response/success.response.js";
 import { generateHash, verifyHash } from "../../Utils/security/hash.security.js";
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
+import { generateToken } from "../../Utils/tokens/token.js";
+
 export const createUser = async (req, res) => {
     const { firstName, lastName, email, password, DOB, phoneNumber, gender } = req.body;
     if (!firstName || !lastName || !email || !password || !DOB || !phoneNumber || !gender) {
@@ -35,6 +36,7 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) {
         throw badRequest({ res, message: "Invalid password" });
     }
-    return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { user } });
+    const accessToken = generateToken({ payload: { id: user._id, email: user.email } });
+    return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { accessToken } });
 
 }
