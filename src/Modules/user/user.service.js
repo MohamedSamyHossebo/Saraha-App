@@ -4,10 +4,11 @@ import successResponse from "../../Utils/response/success.response.js";
 import { badRequest } from "../../Utils/response/error.response.js";
 import { decrypt } from "../../Utils/security/encryption.security.js";
 import { verifyToken } from "../../Utils/tokens/token.js";
+import { JWT_USER_SECRET } from "../../../config/config.service.js";
 
 export const profile = async (req, res) => {
     const { authorization } = req.headers;
-    const decodedToken = verifyToken({ token: authorization });
+    const decodedToken = verifyToken({ token: authorization,secret:JWT_USER_SECRET });
     if (decodedToken.tokenType !== 'access') {
         throw badRequest({ res, message: "Invalid token type" });
     }
