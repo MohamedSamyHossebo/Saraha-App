@@ -6,7 +6,7 @@ import { generateHash, verifyHash } from "../../Utils/security/hash.security.js"
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
 import { generateToken, verifyToken } from "../../Utils/tokens/token.js";
-import { JWT_REFRESH_TOKEN_EXPIRES_IN, JWT_REFRESH_SECRET, JWT_SECRET } from "../../../config/config.service.js";
+import { JWT_REFRESH_TOKEN_EXPIRES_IN, JWT_REFRESH_USER_SECRET, JWT_USER_SECRET } from "../../../config/config.service.js";
 
 export const createUser = async (req, res) => {
     const { firstName, lastName, email, password, DOB, phoneNumber, gender } = req.body;
@@ -37,8 +37,8 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) {
         throw badRequest({ res, message: "Invalid password" });
     }
-    const accessToken = generateToken({ payload: { id: user._id, email: user.email, tokenType: 'access' }, secret: JWT_SECRET });
-    const refreshToken = generateToken({ payload: { id: user._id, email: user.email, tokenType: 'refresh' }, secret: JWT_REFRESH_SECRET, options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN } });
+    const accessToken = generateToken({ payload: { id: user._id, email: user.email, tokenType: 'access' }, secret: JWT_USER_SECRET });
+    const refreshToken = generateToken({ payload: { id: user._id, email: user.email, tokenType: 'refresh' }, secret: JWT_REFRESH_USER_SECRET, options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN } });
     return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { accessToken, refreshToken } });
 
 }
@@ -48,7 +48,7 @@ export const refreshToken = async (req, res) => {
     if (!authorization) {
         throw badRequest({ res, message: "Authorization header is required" });
     }
-    const decodedToken = verifyToken({ token: authorization, secret: JWT_REFRESH_SECRET });
+    const decodedToken = verifyToken({ token: authorization, secret: JWT_REFRESH_USER_SECRET });
     if (decodedToken.tokenType !== 'refresh') {
         throw badRequest({ res, message: "Invalid token type" });
     }

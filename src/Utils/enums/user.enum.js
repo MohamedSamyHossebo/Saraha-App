@@ -6,6 +6,10 @@ export const ROLE = {
     ADMIN: 0,
     USER: 1,
 }
+export const SIGNATURE_ENUM = {
+    ADMIN: 0,
+    USER: 1,
+}
 export const PROVIDER = {
     SYSTEM: 0,
     GOOGLE: 1
