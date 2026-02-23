@@ -5,7 +5,8 @@ import successResponse from "../../Utils/response/success.response.js";
 import { generateHash, verifyHash } from "../../Utils/security/hash.security.js";
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
-import { generateToken } from "../../Utils/tokens/token.js";
+import { generateToken,verifyToken } from "../../Utils/tokens/token.js";
+import { JWT_REFRESH_TOKEN_EXPIRES_IN, JWT_REFRESH_SECRET } from "../../../config/config.service.js";
 
 export const createUser = async (req, res) => {
     const { firstName, lastName, email, password, DOB, phoneNumber, gender } = req.body;
@@ -37,6 +38,21 @@ export const loginUser = async (req, res) => {
         throw badRequest({ res, message: "Invalid password" });
     }
     const accessToken = generateToken({ payload: { id: user._id, email: user.email } });
-    return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { accessToken } });
+    const refreshToken = generateToken({ payload: { id: user._id, email: user.email }, secret: JWT_REFRESH_SECRET, options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN } });
+    return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: { accessToken, refreshToken } });
 
+}
+
+export const refreshToken = async (req, res) => {
+    const { authorization } = req.headers;
+    if (!authorization) {
+        throw badRequest({ res, message: "Authorization header is required" });
+    }
+    const decodedToken = verifyToken({ token: authorization, secret: JWT_REFRESH_SECRET });
+    const user = await dbService.findById({ model: userModel, id: decodedToken.id });
+    if (!user) {
+        throw notFound({ res, message: "User not found" });
+    }
+    const accessToken = generateToken({ payload: { id: user._id, email: user.email } });
+    return successResponse({ res, statusCode: 200, message: "Access token refreshed successfully", data: { accessToken } });
 }
