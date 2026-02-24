@@ -6,7 +6,7 @@ import { generateHash, verifyHash } from "../../Utils/security/hash.security.js"
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
 import { generateToken, verifyToken } from "../../Utils/tokens/token.js";
-import {  JWT_REFRESH_USER_SECRET } from "../../../config/config.service.js";
+import { JWT_REFRESH_USER_SECRET } from "../../../config/config.service.js";
 import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
 
 export const createUser = async (req, res) => {
@@ -34,11 +34,15 @@ export const loginUser = async (req, res) => {
     if (!user) {
         throw notFound({ res, message: "User not found" });
     }
-    const isPasswordValid = await verifyHash({ plainText: password, cipherText: user.password, algo: securityEnum.ARGON2 });
+    const isPasswordValid = await verifyHash({
+        plainText: password,
+        cipherText: user.password,
+        algo: securityEnum.ARGON2
+    });
     if (!isPasswordValid) {
         throw badRequest({ res, message: "Invalid password" });
     }
-    const credentials=await getNewLoginCredentials(user)
+    const credentials = await getNewLoginCredentials(user)
     return successResponse({ res, statusCode: 200, message: "User logged in successfully", data: credentials });
 
 }
@@ -56,6 +60,6 @@ export const refreshToken = async (req, res) => {
     if (!user) {
         throw notFound({ res, message: "User not found" });
     }
-    const credentials=await getNewLoginCredentials(user)
+    const credentials = await getNewLoginCredentials(user)
     return successResponse({ res, statusCode: 200, message: "Access token refreshed successfully", data: credentials });
 }
