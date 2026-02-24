@@ -2,16 +2,16 @@ import mongoose from "mongoose";
 import { GENDER, PROVIDER, ROLE } from "../../../Utils/enums/user.enum.js";
 const userSchema = new mongoose.Schema({
     firstName: {
-        type:String,
-        required:[true,"First name is required"],
-        minLength:[2,"First name must be at least 2 characters"],
-        maxLength:[25,"First name must be less than 25 characters"]
+        type: String,
+        required: [true, "First name is required"],
+        minLength: [2, "First name must be at least 2 characters"],
+        maxLength: [25, "First name must be less than 25 characters"]
     },
     lastName: {
-        type:String,
-        required:[true,"Last name is required"],
-        minLength:[2,"Last name must be at least 2 characters"],
-        maxLength:[25,"Last name must be less than 25 characters"]
+        type: String,
+        required: [true, "Last name is required"],
+        minLength: [2, "Last name must be at least 2 characters"],
+        maxLength: [25, "Last name must be less than 25 characters"]
     },
     email: {
         type: String,
@@ -35,17 +35,17 @@ const userSchema = new mongoose.Schema({
         // match: [/^\d{10}$/, "Please use a valid 10-digit phone number"]
     },
     gender: {
-        type: String,
+        type: Number,
         enum: Object.values(GENDER),
         default: GENDER.MALE
     },
     role: {
-        type: String,
+        type: Number,
         enum: Object.values(ROLE),
         default: ROLE.USER
     },
     provider: {
-        type: String,
+        type: Number,
         enum: Object.values(PROVIDER),
         default: PROVIDER.SYSTEM
     },

@@ -1,6 +1,6 @@
 
 import { TOKEN_TYPE_ENUM, SIGNATURE_ENUM } from "../Utils/enums/user.enum.js";
-import { badRequest, notFound } from "../Utils/response/error.response.js";
+import { badRequest, notFound, unauthorized } from "../Utils/response/error.response.js";
 import { getSignature, verifyToken } from "../Utils/tokens/token.js";
 import * as dbService from "../DB/database.repository.js";
 import userModel from "../DB/Models/User/user.model.js";
@@ -31,6 +31,18 @@ export const authentication = ({ tokenType = TOKEN_TYPE_ENUM.ACCESS }) => {
             const { user, decoded } = await decodedToken({ authorization: req.headers.authorization, tokenType })
             req.user = user
             req.decoded = decoded
+            return next()
+        } catch (error) {
+            return next(error)
+        }
+    }
+}
+export const authorization = ({ accessRoles = [] }) => {
+    return async (req, res, next) => {
+        try {
+            if (!accessRoles.includes(req.user.role)) {
+                throw unauthorized({ message: "You do not have permission to access this resource" });
+            }
             return next()
         } catch (error) {
             return next(error)
