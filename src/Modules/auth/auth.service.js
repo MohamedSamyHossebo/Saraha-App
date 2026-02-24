@@ -48,18 +48,9 @@ export const loginUser = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-    const { authorization } = req.headers;
-    if (!authorization) {
-        throw badRequest({ res, message: "Authorization header is required" });
-    }
-    const decodedToken = verifyToken({ token: authorization, secret: JWT_REFRESH_USER_SECRET });
-    if (decodedToken.tokenType !== 'refresh') {
-        throw badRequest({ res, message: "Invalid token type" });
-    }
-    const user = await dbService.findById({ model: userModel, id: decodedToken.id });
-    if (!user) {
-        throw notFound({ res, message: "User not found" });
-    }
+
+    const user = req.user;
+    console.log(user);
     const credentials = await getNewLoginCredentials(user)
     return successResponse({ res, statusCode: 200, message: "Access token refreshed successfully", data: credentials });
 }

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import * as authService from "./auth.service.js";
-const router=Router();
+import { authentication } from "../../Middlewares/auth.middleware.js";
+import { TOKEN_TYPE_ENUM } from "../../Utils/enums/user.enum.js";
+const router = Router();
 
-router.post("/signup",authService.createUser)
-router.post("/login",authService.loginUser)
-router.post("/refresh-token",authService.refreshToken)
+router.post("/signup", authService.createUser)
+router.post("/login", authService.loginUser)
+router.post("/refresh-token", authentication({ tokenType: TOKEN_TYPE_ENUM.REFRESH }), authService.refreshToken)
 
 export default router;
