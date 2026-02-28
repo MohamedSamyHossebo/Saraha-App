@@ -55,7 +55,20 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        const getEnumKey = (obj, value) =>
+          Object.keys(obj).find((key) => obj[key] === value);
+
+        if (ret.gender !== undefined) ret.gender = getEnumKey(GENDER, ret.gender);
+        if (ret.role !== undefined) ret.role = getEnumKey(ROLE, ret.role);
+        if (ret.provider !== undefined)
+          ret.provider = getEnumKey(PROVIDER, ret.provider);
+
+        return ret;
+      },
+    },
     toObject: { virtuals: true },
   },
 );
