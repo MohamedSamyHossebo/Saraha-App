@@ -7,5 +7,6 @@ const router = Router();
 router.post("/signup", authService.createUser)
 router.post("/login", authService.loginUser)
 router.post("/refresh-token", authentication({ tokenType: TOKEN_TYPE_ENUM.REFRESH }), authService.refreshToken)
+router.post("/google-login", authService.googleLogin)
 
 export default router;

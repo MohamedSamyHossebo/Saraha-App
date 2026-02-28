@@ -17,3 +17,5 @@ export const JWT_REFRESH_ADMIN_SECRET = process.env.JWT_REFRESH_ADMIN_SECRET;
 export const JWT_ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN;
 export const JWT_REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN;
 export const SALT = process.env.SALT;
+// Social Login
+export const CLIENT_ID = process.env.CLIENT_ID;
