@@ -17,20 +17,22 @@ import { JWT_REFRESH_USER_SECRET } from "../../../config/config.service.js";
 import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
+import { signUpSchema } from "./auth.validation.js";
 
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
-  if (
-    !firstName ||
-    !lastName ||
-    !email ||
-    !password ||
-    !DOB ||
-    !phoneNumber ||
-    !gender
-  ) {
-    throw badRequest(res, "All fields are required");
+  const validationResult = signUpSchema.validate({
+    firstName,
+    lastName,
+    email,
+    password,
+    DOB,
+    phoneNumber,
+    gender,
+  })
+  if (validationResult.error) {
+    throw badRequest({ res, message: validationResult.error.details[0].message })
   }
   const existingUser = await dbService.findOne({
     model: userModel,
@@ -103,6 +105,7 @@ export const refreshToken = async (req, res) => {
     data: credentials,
   });
 };
+
 export const verifyGoogle = async ({ idToken }) => {
   const OAuth2Client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const ticket = await OAuth2Client.verifyIdToken({
@@ -124,6 +127,7 @@ export const verifyGoogle = async ({ idToken }) => {
   }
   return user;
 };
+
 export const googleLogin = async (req, res) => {
   const { idToken } = req.body;
   const { email, given_name, family_name, email_verified, picture } =
