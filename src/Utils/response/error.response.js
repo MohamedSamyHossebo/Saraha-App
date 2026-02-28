@@ -15,5 +15,6 @@ export const serviceUnavailable = ({ message = "Service Unavailable", extra = un
 
 export const globalErrorHandler = (err, req, res, next) => {
     const status = err.status ?? 500;
-    return res.status(status).json({ message: err.message, stack: err.stack, status: status })
+    const extra = err.extra ?? null;
+    return res.status(status).json({ message: err.message, stack: err.stack, status: status, extra })
 }
