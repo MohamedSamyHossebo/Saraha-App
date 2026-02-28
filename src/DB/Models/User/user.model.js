@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(GENDER),
       default: GENDER.MALE,
     },
-    profilePic: String,
+    profileImage: String,
     role: {
       type: Number,
       enum: Object.values(ROLE),
@@ -52,7 +52,6 @@ const userSchema = new mongoose.Schema(
       default: PROVIDER.SYSTEM,
     },
     confirmEmail: Date,
-    profilePic: String,
   },
   {
     timestamps: true,
