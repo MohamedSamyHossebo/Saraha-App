@@ -2,8 +2,9 @@ import connectDB from "./DB/connection.js";
 import { authRouter, userRouter, messageRouter } from "./Modules/index.js"
 import { badRequest, globalErrorHandler } from "./Utils/response/error.response.js";
 import cors from "cors";
+import multer from "multer";
 const bootstrap = async (app, express) => {
-  app.use(express.json(), cors())
+    app.use(express.json(), cors())
     await connectDB();
     app.get("/", (req, res) => {
         res.status(200).json({
