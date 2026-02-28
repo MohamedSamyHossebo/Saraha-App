@@ -19,6 +19,7 @@ import { PROVIDER } from "../../Utils/enums/user.enum.js";
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
+  const profileImage = req.file?.path;
   const existingUser = await dbService.findOne({
     model: userModel,
     filter: { email },
@@ -42,6 +43,7 @@ export const createUser = async (req, res) => {
         DOB,
         phoneNumber: encryptedData,
         gender,
+        profileImage,
       },
     ],
   });

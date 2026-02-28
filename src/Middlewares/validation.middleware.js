@@ -1,6 +1,6 @@
 import { badRequest } from "../Utils/response/error.response.js";
 import Joi from "joi";
-import { GENDER,ROLE,PROVIDER } from "../Utils/enums/user.enum.js";
+import { GENDER, ROLE, PROVIDER } from "../Utils/enums/user.enum.js";
 import { Types } from "mongoose";
 export const generalFields = {
     firstName: Joi.string().alphanum().min(2).max(25).message({
@@ -25,9 +25,9 @@ export const generalFields = {
     password: Joi.string(),
     DOB: Joi.date(),
     phoneNumber: Joi.string(),
-    gender: Joi.string().valid(...Object.values(GENDER)),
-    role: Joi.string().valid(...Object.values(ROLE)),
-    provider:Joi.string().valid(...Object.values(PROVIDER)),
+    gender: Joi.number().valid(...Object.values(GENDER)),
+    role: Joi.number().valid(...Object.values(ROLE)),
+    provider: Joi.number().valid(...Object.values(PROVIDER)),
     profileImage: Joi.string(),
     id: Joi.string().custom((value, helper) => {
         return (
