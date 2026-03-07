@@ -17,7 +17,7 @@ import { getNewLoginCredentials,createRevokeToken } from "../../Utils/tokens/tok
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
-import { keys, del, set, revokeTokenKey, baseRevokeTokenKey } from "../../services/index.js"
+import { keys, del, baseRevokeTokenKey } from "../../services/index.js"
 
 
 
