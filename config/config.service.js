@@ -19,3 +19,5 @@ export const JWT_REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_TOKEN_EXPIRE
 export const SALT = process.env.SALT;
 // Social Login
 export const CLIENT_ID = process.env.CLIENT_ID;
+// Redis
+export const REDIS_URL = process.env.REDIS_URL;
