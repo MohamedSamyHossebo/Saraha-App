@@ -15,11 +15,19 @@ import { encrypt } from "../../Utils/security/encryption.security.js";
 import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
+import cloudinary from "../../../config/cloudinary.js";
 
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
-  const profileImage = req.file?.path;
+  let profileImage;
+  if (req.file) {
+    const { secure_url, public_id } = await cloudinary.v2.uploader.upload(
+      req.file.path,
+      { folder: `Saraha-App/User/profile` }
+    );
+    profileImage = { secure_url, public_id };
+  }
   const existingUser = await dbService.findOne({
     model: userModel,
     filter: { email },

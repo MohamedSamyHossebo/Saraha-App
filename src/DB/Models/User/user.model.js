@@ -40,7 +40,10 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(GENDER),
       default: GENDER.MALE,
     },
-    profileImage: String,
+    profileImage: {
+      secure_url: String,
+      public_id: String,
+    },
     role: {
       type: Number,
       enum: Object.values(ROLE),
