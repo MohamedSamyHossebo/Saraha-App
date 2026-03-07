@@ -162,7 +162,7 @@ export const googleLogin = async (req, res) => {
 export const logoutUser = async (req, res) => {
   const { flag } = req.body;
   const user = req.user;
-  const { jti, iat, exp, sub } = req.decoded;
+  const { jti, iat, sub } = req.decoded;
   let status = 200;
   switch (flag) {
     case authEnum.ALL:
