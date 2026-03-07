@@ -18,7 +18,7 @@ import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
 import tokenModel from "../../DB/Models/Token/token.model.js";
-import * as redisService from "../../services/index.js"
+import { keys, del, set, revokeTokenKey, baseRevokeTokenKey } from "../../services/index.js"
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
@@ -162,16 +162,13 @@ export const googleLogin = async (req, res) => {
 export const logoutUser = async (req, res) => {
   const { flag } = req.body;
   const user = req.user;
-  const { jti, iat, exp } = req.decoded;
+  const { jti, iat, exp, sub } = req.decoded;
   let status = 200;
   switch (flag) {
     case authEnum.ALL:
       user.changeCredentialsAt = new Date();
       await user.save();
-      await dbService.deleteMany({
-        model: tokenModel,
-        filter: { userId: user._id },
-      });
+      await del(await keys(baseRevokeTokenKey(sub)))
       status = 200;
       break;
     default:
@@ -179,10 +176,10 @@ export const logoutUser = async (req, res) => {
         throw badRequest({ res, message: "Invalid token: missing jti. Please login again." });
       }
 
-      await redisService.set({
-        key: redisService.revokeTokenKey({ sub: user._id, jti }),
+      await set({
+        key: revokeTokenKey({ userId: sub, jti }),
         value: jti,
-        ttl: exp - Math.floor(Date.now() / 1000),
+        ttl: iat - JWT_REFRESH_TOKEN_EXPIRES_IN,
       })
       status = 201;
       break;

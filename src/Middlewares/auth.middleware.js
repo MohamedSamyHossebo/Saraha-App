@@ -21,11 +21,11 @@ export const decodedToken = async ({ authorization, tokenType = TOKEN_TYPE_ENUM.
 
     // Check Redis Blacklist
     const isBlacklisted = await redisService.get({
-        key: redisService.revokeTokenKey({ sub: decoded.id, jti: decoded.jti })
+        key: redisService.revokeTokenKey({ userId: decoded.sub, jti: decoded.jti })
     });
     if (isBlacklisted) { throw unauthorized({ message: "Token is blacklisted" }); }
 
-    const user = await dbService.findById({ model: userModel, id: decoded.id })
+    const user = await dbService.findById({ model: userModel, id: decoded.sub })
     if (!user) { throw notFound({ message: "User not found" }); }
 
     if (user.changeCredentialsAt && parseInt(user.changeCredentialsAt.getTime() / 1000) > decoded.iat) {

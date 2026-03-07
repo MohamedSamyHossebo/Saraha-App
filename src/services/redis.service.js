@@ -1,5 +1,9 @@
 import { redisClient } from "../DB/redis.connection.db.js";
-export const revokeTokenKey = ({ sub, jti }) => `RevokeToken::${sub}::${jti}`;
+export const baseRevokeTokenKey=(userId)=> {
+    return `RevokeToken::${userId}`
+}
+export const revokeTokenKey = ({ userId, jti }) => `${baseRevokeTokenKey(userId)}::${jti}`;
+
 export const set = async ({ key, value, ttl } = {}) => {
     try {
         let data = typeof value === "string" ? value : JSON.stringify(value);
