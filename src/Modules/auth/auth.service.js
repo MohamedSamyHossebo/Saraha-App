@@ -11,10 +11,13 @@ import {
   verifyHash,
 } from "../../Utils/security/hash.security.js";
 import { securityEnum } from "../../Utils/enums/security.enum.js";
+import authEnum from "../../Utils/enums/auth.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
 import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
+import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
+import tokenModel from "../../DB/Models/Token/token.model.js";
 
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
@@ -155,3 +158,44 @@ export const googleLogin = async (req, res) => {
     data: credentials,
   });
 };
+
+export const logoutUser = async (req, res) => {
+  const { flag } = req.body;
+  const user = req.user;
+  const { jti, exp } = req.decoded;
+  let status = 200;
+  switch (flag) {
+    case authEnum.ALL:
+      user.changeCredentialsAt = new Date();
+      await user.save();
+      await dbService.deleteMany({
+        model: tokenModel,
+        filter: { userId: user._id },
+      });
+      status = 200;
+      break;
+    default:
+      if (!jti) {
+        throw badRequest({ res, message: "Invalid token: missing jti. Please login again." });
+      }
+      await dbService.create({
+        model: tokenModel,
+        data: [
+          {
+            userId: user._id,
+            jti,
+            expiresIn: new Date(exp * 1000),
+          },
+        ],
+      });
+      status = 201;
+      break;
+  }
+
+  return successResponse({
+    res,
+    statusCode: status,
+    message: "User logged out successfully",
+    data: {},
+  })
+}

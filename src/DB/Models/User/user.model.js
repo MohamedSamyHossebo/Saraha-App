@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema(
       default: PROVIDER.SYSTEM,
     },
     confirmEmail: Date,
+    changeCredentialsAt: Date,
   },
   {
     timestamps: true,

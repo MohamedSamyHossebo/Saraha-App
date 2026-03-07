@@ -46,6 +46,7 @@ export const create = async ({ model, data = [], options = { validateBeforeSave:
     const [doc] = (await model.create(data, options)) || [];
     return doc;
 }
+
 export const updateOne = async ({ model, filter = {}, update, options = {} }) => {
     return await model.updateOne(filter, { ...update, $inc: { __v: 1 } }, options);
 }

@@ -9,6 +9,7 @@ const router = Router();
 
 router.post("/signup", localFileUpload().single("profileImage"), validationMiddleware(signUpSchema), authService.createUser)
 router.post("/login", validationMiddleware(loginSchema), authService.loginUser)
+router.post("/logout", authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }), authService.logoutUser)
 router.post("/refresh-token", authentication({ tokenType: TOKEN_TYPE_ENUM.REFRESH }), authService.refreshToken)
 router.post("/google-login", authService.googleLogin)
 

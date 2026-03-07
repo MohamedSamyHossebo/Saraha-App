@@ -4,6 +4,7 @@ import { badRequest, notFound, unauthorized } from "../Utils/response/error.resp
 import { getSignature, verifyToken } from "../Utils/tokens/token.js";
 import * as dbService from "../DB/database.repository.js";
 import userModel from "../DB/Models/User/user.model.js";
+import tokenModel from "../DB/Models/Token/token.model.js";
 
 export const decodedToken = async ({ authorization, tokenType = TOKEN_TYPE_ENUM.ACCESS }) => {
     if (!authorization) { throw badRequest({ message: "Authorization header is required" }); }
@@ -19,9 +20,16 @@ export const decodedToken = async ({ authorization, tokenType = TOKEN_TYPE_ENUM.
         secret: tokenType === TOKEN_TYPE_ENUM.ACCESS ? signature.accessSignature : signature.refreshSignature
     })
     console.log(decoded);
+    const blacklistedToken = await dbService.findOne({ model: tokenModel, filter: { jti: decoded.jti } })
+    if (blacklistedToken) { throw unauthorized({ message: "Token is blacklisted" }); }
+
     const user = await dbService.findById({ model: userModel, id: decoded.id })
-    console.log(user);
     if (!user) { throw notFound({ message: "User not found" }); }
+
+    if (user.changeCredentialsAt && parseInt(user.changeCredentialsAt.getTime() / 1000) > decoded.iat) {
+        throw unauthorized({ message: "Token expired. Please login again." });
+    }
+
     return { user, decoded }
 }
 

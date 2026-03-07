@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { JWT_USER_SECRET, JWT_ACCESS_TOKEN_EXPIRES_IN, JWT_ADMIN_SECRET, JWT_REFRESH_ADMIN_SECRET, JWT_REFRESH_USER_SECRET, JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js";
 import { SIGNATURE_ENUM } from "../../Utils/enums/user.enum.js";
 
@@ -29,7 +30,19 @@ export const getSignature = ({ signatureLevel = SIGNATURE_ENUM.USER }) => {
 }
 export const getNewLoginCredentials = async (user) => {
     const signature = await getSignature({ signatureLevel: user.role != SIGNATURE_ENUM.ADMIN ? SIGNATURE_ENUM.USER : SIGNATURE_ENUM.ADMIN })
-    const accessToken = await generateToken({ payload: { id: user._id, role: user.role, tokenType: 'access' }, secret: signature.accessSignature, options: { expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN } })
-    const refreshToken = await generateToken({ payload: { id: user._id, role: user.role, tokenType: 'refresh' }, secret: signature.refreshSignature, options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN } })
+
+    const jtiAccess = crypto.randomUUID();
+    const jtiRefresh = crypto.randomUUID();
+
+    const accessToken = await generateToken({
+        payload: { id: user._id, role: user.role, tokenType: 'access', jti: jtiAccess },
+        secret: signature.accessSignature,
+        options: { expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN }
+    })
+    const refreshToken = await generateToken({
+        payload: { id: user._id, role: user.role, tokenType: 'refresh', jti: jtiRefresh },
+        secret: signature.refreshSignature,
+        options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN }
+    })
     return { accessToken, refreshToken }
 }
