@@ -11,15 +11,13 @@ export const decodedToken = async ({ authorization, tokenType = TOKEN_TYPE_ENUM.
 
     const [prefix, token] = authorization.split(" ");
     if (!prefix || !token) { throw badRequest({ message: "Invalid Authorization header" }); }
-    console.log(prefix, token);
+
     const signatureLevel = prefix === "Admin" ? SIGNATURE_ENUM.ADMIN : SIGNATURE_ENUM.USER;
     const signature = getSignature({ signatureLevel })
-    console.log(signature);
     const decoded = verifyToken({
         token,
         secret: tokenType === TOKEN_TYPE_ENUM.ACCESS ? signature.accessSignature : signature.refreshSignature
     })
-    console.log(decoded);
 
     // Check Redis Blacklist
     const isBlacklisted = await redisService.get({
