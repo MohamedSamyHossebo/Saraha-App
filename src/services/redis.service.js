@@ -1,5 +1,5 @@
-import redisClient from "../DB/redis.connection.db.js";
-
+import { redisClient } from "../DB/redis.connection.db.js";
+export const revokeTokenKey = ({ sub, jti }) => `RevokeToken::${sub}::${jti}`;
 export const set = async ({ key, value, ttl } = {}) => {
     try {
         let data = typeof value === "string" ? value : JSON.stringify(value);
@@ -66,7 +66,7 @@ export const expire = async ({ key, ttl } = {}) => {
         console.log("Redis expire error", error);
     }
 }
-export const keys = async ({prefix} = {}) => {
+export const keys = async ({ prefix } = {}) => {
     try {
         const data = await redisClient.keys(`${prefix}*`);
         return data;

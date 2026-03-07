@@ -18,7 +18,7 @@ import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
 import tokenModel from "../../DB/Models/Token/token.model.js";
-
+import * as redisService from "../../services/index.js"
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
@@ -162,7 +162,7 @@ export const googleLogin = async (req, res) => {
 export const logoutUser = async (req, res) => {
   const { flag } = req.body;
   const user = req.user;
-  const { jti, exp } = req.decoded;
+  const { jti, iat, exp } = req.decoded;
   let status = 200;
   switch (flag) {
     case authEnum.ALL:
@@ -178,16 +178,12 @@ export const logoutUser = async (req, res) => {
       if (!jti) {
         throw badRequest({ res, message: "Invalid token: missing jti. Please login again." });
       }
-      await dbService.create({
-        model: tokenModel,
-        data: [
-          {
-            userId: user._id,
-            jti,
-            expiresIn: new Date(exp * 1000),
-          },
-        ],
-      });
+
+      await redisService.set({
+        key: redisService.revokeTokenKey({ sub: user._id, jti }),
+        value: jti,
+        ttl: exp - Math.floor(Date.now() / 1000),
+      })
       status = 201;
       break;
   }
