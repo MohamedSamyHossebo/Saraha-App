@@ -17,8 +17,10 @@ import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
-import tokenModel from "../../DB/Models/Token/token.model.js";
 import { keys, del, set, revokeTokenKey, baseRevokeTokenKey } from "../../services/index.js"
+
+
+
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
     req.body;
