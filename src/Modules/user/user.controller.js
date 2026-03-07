@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as userService from "./user.service.js";
 import { authentication, authorization } from "../../Middlewares/auth.middleware.js";
 import { ROLE, TOKEN_TYPE_ENUM } from "../../Utils/enums/user.enum.js";
-import { localFileUpload } from "../../Utils/mutler/local.multer.js";
+import { localFileUpload } from "../../Middlewares/multer.middleware.js";
 const router = Router();
 
 router.get("/",
