@@ -6,7 +6,6 @@ import { SIGNATURE_ENUM } from "../../Utils/enums/user.enum.js";
 export const generateToken = ({ payload, secret, options = { expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN } }) => {
     return jwt.sign(payload, secret, options);
 }
-
 export const verifyToken = ({ token, secret }) => {
     return jwt.verify(token, secret);
 }
@@ -45,4 +44,11 @@ export const getNewLoginCredentials = async (user) => {
         options: { expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN }
     })
     return { accessToken, refreshToken }
+}
+export const createRevokeToken = async (userId, jti, exp) => {
+    await set({
+        key: revokeTokenKey({ userId, jti }),
+        value: jti,
+        ttl: exp - Math.floor(Date.now() / 1000),
+    })
 }

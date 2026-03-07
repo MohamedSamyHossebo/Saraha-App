@@ -13,7 +13,7 @@ import {
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import authEnum from "../../Utils/enums/auth.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
-import { getNewLoginCredentials } from "../../Utils/tokens/token.js";
+import { getNewLoginCredentials,createRevokeToken } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { JWT_REFRESH_TOKEN_EXPIRES_IN } from "../../../config/config.service.js"
@@ -88,7 +88,11 @@ export const loginUser = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   const user = req.user;
-  console.log(user);
+  const { jti, exp, sub } = req.decoded;
+  if (exp * 1000 > Date.now() + 30000) {
+    throw badRequest({ res, message: "Refresh token is not expired" });
+  }
+  await createRevokeToken(sub, jti, exp)
   const credentials = await getNewLoginCredentials(user);
   return successResponse({
     res,
@@ -164,7 +168,7 @@ export const googleLogin = async (req, res) => {
 export const logoutUser = async (req, res) => {
   const { flag } = req.body;
   const user = req.user;
-  const { jti, iat, sub } = req.decoded;
+  const { jti, exp, sub } = req.decoded;
   let status = 200;
   switch (flag) {
     case authEnum.ALL:
@@ -178,11 +182,7 @@ export const logoutUser = async (req, res) => {
         throw badRequest({ res, message: "Invalid token: missing jti. Please login again." });
       }
 
-      await set({
-        key: revokeTokenKey({ userId: sub, jti }),
-        value: jti,
-        ttl: iat - JWT_REFRESH_TOKEN_EXPIRES_IN,
-      })
+      await createRevokeToken(sub, jti, exp)
       status = 201;
       break;
   }
