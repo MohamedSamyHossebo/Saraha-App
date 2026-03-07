@@ -13,6 +13,9 @@ export const profile = async (req, res) => {
     });
 }
 export const updateProfilePicture = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "Please upload a file" });
+    }
     const path = `uploads/${req.file.filename}`
     const user = await dbService.findByIdAndUpdate({
         model: userModel,
