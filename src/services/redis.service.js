@@ -12,10 +12,14 @@ export const set = async ({ key, value, ttl } = {}) => {
         console.log("Redis set error", error);
     }
 }
-export const update = async ({ key } = {}) => {
+export const update = async ({ key, value, ttl } = {}) => {
     try {
-        if (! await redisClient.exists(key)) return 0;
-        return await redisClient.set(key, value, ttl);
+        const exists = await redisClient.exists(key);
+        if (!exists) return 0;
+        let data = typeof value === "string" ? value : JSON.stringify(value);
+        return ttl 
+            ? await redisClient.set(key, data, { EX: ttl }) 
+            : await redisClient.set(key, data, { KEEPTTL: true }); 
     } catch (error) {
         console.log("Redis update error", error);
     }
