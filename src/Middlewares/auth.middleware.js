@@ -25,7 +25,7 @@ export const decodedToken = async ({ authorization, tokenType = TOKEN_TYPE_ENUM.
     });
     if (isBlacklisted) { throw unauthorized({ message: "Token is blacklisted" }); }
 
-    const user = await dbService.findById({ model: userModel, id: decoded.sub })
+    const user = await dbService.findById({ model: userModel, id: decoded.sub, select: "-password" })
     if (!user) { throw notFound({ message: "User not found" }); }
 
     if (user.changeCredentialsAt && parseInt(user.changeCredentialsAt.getTime() / 1000) > decoded.iat) {
