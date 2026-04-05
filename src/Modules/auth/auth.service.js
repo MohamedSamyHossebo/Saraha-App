@@ -13,12 +13,21 @@ import {
 import { securityEnum } from "../../Utils/enums/security.enum.js";
 import authEnum from "../../Utils/enums/auth.enum.js";
 import { encrypt } from "../../Utils/security/encryption.security.js";
-import { getNewLoginCredentials,createRevokeToken } from "../../Utils/tokens/token.js";
+import {
+  getNewLoginCredentials,
+  createRevokeToken,
+} from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
-import { keys, del, baseRevokeTokenKey } from "../../services/index.js"
-
-
+import { keys, del, baseRevokeTokenKey } from "../../services/index.js";
+import {
+  sendEmail,
+  emailText,
+  emailSubject,
+  emailHTML,
+  emailAttachments,
+} from "../../Utils/email/mail.utils.js";
+import { emailEmitter } from "../../Utils/events/email.events.js";
 
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
@@ -36,6 +45,11 @@ export const createUser = async (req, res) => {
     plainText: password,
     algo: securityEnum.ARGON2,
   });
+  const otp = String(Math.floor(Math.random() * (900000 + 100000) + 100000));
+  const hashedOtp = await generateHash({
+    plainText: otp,
+    algo: securityEnum.ARGON2,
+  });
   const user = await dbService.create({
     model: userModel,
     data: [
@@ -48,9 +62,14 @@ export const createUser = async (req, res) => {
         phoneNumber: encryptedData,
         gender,
         profileImage,
+        isActive: false,
+        confirmEmailOtp: hashedOtp,
       },
     ],
   });
+  //  OTP Event
+  emailEmitter.emit("confirmEmail", { email, otp });
+
   return successResponse({
     res,
     statusCode: 201,
@@ -91,7 +110,7 @@ export const refreshToken = async (req, res) => {
   if (exp * 1000 > Date.now() + 30000) {
     throw badRequest({ res, message: "Refresh token is not expired" });
   }
-  await createRevokeToken(sub, jti, exp)
+  await createRevokeToken(sub, jti, exp);
   const credentials = await getNewLoginCredentials(user);
   return successResponse({
     res,
@@ -173,15 +192,18 @@ export const logoutUser = async (req, res) => {
     case authEnum.ALL:
       user.changeCredentialsAt = new Date();
       await user.save();
-      await del(await keys(baseRevokeTokenKey(sub)))
+      await del(await keys(baseRevokeTokenKey(sub)));
       status = 200;
       break;
     default:
       if (!jti) {
-        throw badRequest({ res, message: "Invalid token: missing jti. Please login again." });
+        throw badRequest({
+          res,
+          message: "Invalid token: missing jti. Please login again.",
+        });
       }
 
-      await createRevokeToken(sub, jti, exp)
+      await createRevokeToken(sub, jti, exp);
       status = 201;
       break;
   }
@@ -191,5 +213,5 @@ export const logoutUser = async (req, res) => {
     statusCode: status,
     message: "User logged out successfully",
     data: {},
-  })
-}
+  });
+};

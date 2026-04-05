@@ -51,6 +51,8 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(PROVIDER),
       default: PROVIDER.SYSTEM,
     },
+    confirmEmailOtp:String,
+    isActive:Boolean,
     confirmEmail: Date,
     changeCredentialsAt: Date,
   },

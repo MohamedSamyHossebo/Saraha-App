@@ -3,15 +3,13 @@ import { authRouter, userRouter, messageRouter } from "./Modules/index.js"
 import { badRequest, globalErrorHandler } from "./Utils/response/error.response.js";
 import connectRedis from "./DB/redis.connection.db.js";
 import cors from "cors";
+import { sendEmail } from "./Utils/email/mail.utils.js";
 const bootstrap = async (app, express) => {
     app.use(express.json(), cors())
     app.use(express.static("public"))
     app.use("/uploads", express.static("./src/uploads"))
     await connectDB();
     await connectRedis();
-
-
-
     app.get("/", (req, res) => {
         res.status(200).json({
             status: "success",
