@@ -35,6 +35,7 @@ export const emailSubject = {
   confirmEmailSuccess: "Confirm Your Email Success",
   forgetPassword: "Forget Password",
   resetPassword: "Your Password Has Been Reset",
+  changePassword: "Your Password Has Been Changed",
   welcome: "Welcome to Saraha App",
   contactUs: "Contact Us",
 };
@@ -93,6 +94,22 @@ export const emailHTML = {
       <div style="margin-bottom: 24px;">
         <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">Your Password Has Been Reset</h1>
         <p style="color: #4a5568; font-size: 16px; margin-top: 12px;">Your password has been reset successfully.</p>
+      </div>
+      
+      <div style="margin: 32px 0;">
+        <div style="display: inline-block; background: #000000; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-size: 32px; font-weight: 700; letter-spacing: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          ${name}
+        </div>
+      </div>
+
+      <p style="color: #718096; font-size: 14px; margin-bottom: 0;"> If you didn't request this, please contact the support team.</p>
+    </div>
+  `,
+  changePassword: (name) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1px solid #e1e4e8; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+      <div style="margin-bottom: 24px;">
+        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">Your Password Has Been Changed</h1>
+        <p style="color: #4a5568; font-size: 16px; margin-top: 12px;">Your password has been changed successfully.</p>
       </div>
       
       <div style="margin: 32px 0;">
@@ -176,6 +193,14 @@ export const emailText = {
     
     If you didn't request this change, please ignore this email.
   `,
+  changePassword: (name) => `
+    Your Password Has Been Changed
+    
+    Hello ${name},
+    Your password has been changed successfully.
+    
+    If you didn't request this, please contact the support team.
+  `,
   welcome: (name) => `
     Welcome to Saraha App
     Hello ${name},
@@ -215,6 +240,12 @@ export const emailAttachments = {
     {
       filename: "forget-password.html",
       content: emailHTML.forgetPassword(otp),
+    },
+  ],
+  changePassword: (name) => [
+    {
+      filename: "change-password.html",
+      content: emailHTML.changePassword(name),
     },
   ],
   welcome: (name) => [

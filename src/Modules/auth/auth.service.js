@@ -226,6 +226,51 @@ export const resetPassword = async (req, res) => {
     message: "Password reset successfully",
   });
 };
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+  if (newPassword !== confirmPassword) {
+    throw badRequest({ res, message: "Passwords do not match" });
+  }
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: {
+      email: req.user.email,
+      confirmEmail: { $exists: true },
+      provider: PROVIDER.SYSTEM,
+    },
+  });
+  if (!user) {
+    throw notFound({ res, message: "User not found" });
+  }
+  const isPasswordValid = await verifyHash({
+    plainText: oldPassword,
+    cipherText: user.password,
+    algo: securityEnum.ARGON2,
+  });
+  if (!isPasswordValid) {
+    throw badRequest({ res, message: "Invalid old password" });
+  }
+  const hashedPassword = await generateHash({
+    plainText: newPassword,
+    algo: securityEnum.ARGON2,
+  });
+  await dbService.updateOne({
+    model: userModel,
+    filter: { email: req.user.email },
+    update: {
+      password: hashedPassword,
+    },
+  });
+  emailEmitter.emit("changePassword", {
+    email: req.user.email,
+    name: user.firstName,
+  });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Password changed successfully",
+  });
+};
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

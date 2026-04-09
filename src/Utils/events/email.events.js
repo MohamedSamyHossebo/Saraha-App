@@ -49,6 +49,16 @@ emailEmitter.on("resetPassword", async (data) => {
     console.log(err);
   });
 });
+emailEmitter.on("changePassword", async (data) => {
+  await sendEmail({
+    to: data.email,
+    subject: emailSubject.changePassword,
+    text: emailText.changePassword(data.name),
+    html: emailHTML.changePassword(data.name),
+  }).catch((err) => {
+    console.log(err);
+  });
+});
 
 emailEmitter.on("welcome", async (data) => {
   await sendEmail({
