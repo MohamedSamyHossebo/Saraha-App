@@ -92,10 +92,15 @@ export const confirmEmail = async (req, res) => {
   if (!isOtpValid) {
     throw badRequest({ res, message: "Invalid OTP" });
   }
-  user.isActive = true;
-  user.confirmEmail = new Date().toISOString();
-  user.confirmEmailOtp = null;
-  await user.save();
+  await dbService.updateOne({
+    model: userModel,
+    filter: { email },
+    update: {
+      isActive: true,
+      confirmEmail: Date.now(),
+      $unset: { confirmEmailOtp: true },
+    },
+  });
   emailEmitter.emit("confirmEmailSuccess", { email, name: user.firstName });
   return successResponse({
     res,
