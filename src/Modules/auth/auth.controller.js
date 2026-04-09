@@ -8,7 +8,7 @@ import { localFileUpload } from "../../Middlewares/multer.middleware.js";
 const router = Router();
 
 router.post("/signup", localFileUpload().single("profileImage"), validationMiddleware(signUpSchema), authService.createUser)
-router.post("/confirm-email", validationMiddleware(confirmEmailSchema), authService.confirmEmail)
+router.patch("/confirm-email", validationMiddleware(confirmEmailSchema), authService.confirmEmail)
 router.post("/login", validationMiddleware(loginSchema), authService.loginUser)
 router.post("/logout", authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }), authService.logoutUser)
 router.post("/refresh-token", authentication({ tokenType: TOKEN_TYPE_ENUM.REFRESH }), authService.refreshToken)
