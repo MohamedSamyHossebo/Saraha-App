@@ -19,6 +19,7 @@ import {
 } from "../../Utils/tokens/token.js";
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
+import * as redisService from "../../services/index.js";
 import { keys, del, baseRevokeTokenKey } from "../../services/index.js";
 
 import { emailEmitter } from "../../Utils/events/email.events.js";
@@ -110,6 +111,7 @@ export const confirmEmail = async (req, res) => {
     data: user,
   });
 };
+// Expiration time
 // Max resend OTP 3 times using redis
 export const resendOtp = async (req, res) => {
   const { email } = req.body;
@@ -129,6 +131,14 @@ export const resendOtp = async (req, res) => {
     plainText: otp,
     algo: securityEnum.ARGON2,
   });
+  const otpCountKey = `otp:${email}`;
+  const getOtpCount = await redisService.incr({ key: otpCountKey });
+  if (getOtpCount === 1) {
+    await redisService.expire({ key: otpCountKey, ttl: 60 * 60 * 24 });
+  }
+  if (getOtpCount > 3) {
+    throw badRequest({ res, message: "Max resend OTP 3 times" });
+  }
   await dbService.updateOne({
     model: userModel,
     filter: { email },
@@ -140,8 +150,7 @@ export const resendOtp = async (req, res) => {
   return successResponse({
     res,
     statusCode: 200,
-    message: "OTP resent successfully",
-    data: user,
+    message: "OTP resent successfully check your email",
   });
 };
 export const loginUser = async (req, res) => {

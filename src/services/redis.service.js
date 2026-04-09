@@ -82,3 +82,10 @@ export const keys = async ({ prefix } = {}) => {
         console.log("Redis keys error", error);
     }
 }
+export const incr = async ({ key } = {}) => {
+    try {
+        return await redisClient.incr(key);
+    } catch (error) {
+        console.log("Redis incr error", error);
+    }
+}

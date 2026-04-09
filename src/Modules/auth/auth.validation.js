@@ -31,3 +31,10 @@ export const confirmEmailSchema = {
     params: Joi.object({}),
     query: Joi.object({}),
 }
+export const resendOtpSchema = {
+    body: Joi.object({
+        email: generalFields.email.required(),
+    }),
+    params: Joi.object({}),
+    query: Joi.object({}),
+}
