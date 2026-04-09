@@ -22,6 +22,7 @@ import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { keys, del, baseRevokeTokenKey } from "../../services/index.js";
 
 import { emailEmitter } from "../../Utils/events/email.events.js";
+import { generateOtp } from "../../Utils/security/otp.security.js";
 
 export const createUser = async (req, res) => {
   const { firstName, lastName, email, password, DOB, phoneNumber, gender } =
@@ -39,7 +40,7 @@ export const createUser = async (req, res) => {
     plainText: password,
     algo: securityEnum.ARGON2,
   });
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otp = generateOtp();
   const hashedOtp = await generateHash({
     plainText: otp,
     algo: securityEnum.ARGON2,
@@ -106,6 +107,40 @@ export const confirmEmail = async (req, res) => {
     res,
     statusCode: 200,
     message: "Email confirmed successfully",
+    data: user,
+  });
+};
+// Max resend OTP 3 times using redis
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: {
+      email,
+      confirmEmail: { $exists: false },
+      confirmEmailOtp: { $exists: true },
+    },
+  });
+  if (!user) {
+    throw notFound({ res, message: "User not found" });
+  }
+  const otp = generateOtp();
+  const hashedOtp = await generateHash({
+    plainText: otp,
+    algo: securityEnum.ARGON2,
+  });
+  await dbService.updateOne({
+    model: userModel,
+    filter: { email },
+    update: {
+      confirmEmailOtp: hashedOtp,
+    },
+  });
+  emailEmitter.emit("confirmEmail", { email, otp });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "OTP resent successfully",
     data: user,
   });
 };
