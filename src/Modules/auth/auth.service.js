@@ -292,6 +292,25 @@ export const toggleFreezeAccount = async (req, res) => {
     message: `Account ${newStatus ? "activated" : "frozen"} successfully`,
   });
 };
+export const deleteAccount = async (req, res) => {
+  const { userId } = req.params;
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: { _id: userId },
+  });
+  if (!user) {
+    throw notFound({ message: "User not found" });
+  }
+  await dbService.deleteOne({
+    model: userModel,
+    filter: { _id: userId },
+  });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Account deleted successfully",
+  });
+};
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

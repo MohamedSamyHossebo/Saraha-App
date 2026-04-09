@@ -67,5 +67,11 @@ router.post(
   authService.refreshToken,
 );
 router.post("/google-login", authService.googleLogin);
+router.delete(
+  "/delete-account/:userId",
+  authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }),
+  authorization({ accessRoles: [ROLE.ADMIN] }),
+  authService.deleteAccount,
+);
 
 export default router;
