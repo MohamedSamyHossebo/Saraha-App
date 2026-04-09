@@ -34,7 +34,7 @@ export const createUser = async (req, res) => {
     filter: { email },
   });
   if (existingUser) {
-    throw conflict({ res, message: "User already exists" });
+    throw conflict({ message: "User already exists" });
   }
   const encryptedData = await encrypt(phoneNumber);
   const hashedPassword = await generateHash({
@@ -137,7 +137,7 @@ export const resendOtp = async (req, res) => {
     await redisService.expire({ key: otpCountKey, ttl: 60 * 60 * 24 });
   }
   if (getOtpCount > 3) {
-    throw badRequest({ res, message: "Max resend OTP 3 times" });
+    throw badRequest({ message: "Max resend OTP 3 times" });
   }
   await dbService.updateOne({
     model: userModel,
@@ -248,7 +248,7 @@ export const changePassword = async (req, res) => {
     algo: securityEnum.ARGON2,
   });
   if (!isPasswordValid) {
-    throw badRequest({ res, message: "Invalid old password" });
+    throw badRequest({ message: "Invalid old password" });
   }
   const hashedPassword = await generateHash({
     plainText: newPassword,
@@ -271,20 +271,44 @@ export const changePassword = async (req, res) => {
     message: "Password changed successfully",
   });
 };
+export const toggleFreezeAccount = async (req, res) => {
+  const { userId } = req.params;
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: { _id: userId },
+  });
+  if (!user) {
+    throw notFound({ message: "User not found" });
+  }
+  const newStatus = !user.isActive;
+  await dbService.updateOne({
+    model: userModel,
+    filter: { _id: userId },
+    update: { isActive: newStatus },
+  });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: `Account ${newStatus ? "activated" : "frozen"} successfully`,
+  });
+};
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    throw badRequest({ res, message: "Email and password are required" });
+    throw badRequest({ message: "Email and password are required" });
   }
   const user = await dbService.findOne({
     model: userModel,
-    filter: { email, isActive: true, confirmEmail: { $exists: true } },
+    filter: { email },
   });
-  if (!user?.isActive) {
-    throw badRequest({ res, message: "Email not confirmed" });
-  }
   if (!user) {
-    throw notFound({ res, message: "User not found" });
+    throw notFound({ message: "User not found" });
+  }
+  if (!user.confirmEmail) {
+    throw badRequest({ message: "Email not confirmed" });
+  }
+  if (!user.isActive) {
+    throw badRequest({ message: "Account is frozen, please contact admin" });
   }
   const isPasswordValid = await verifyHash({
     plainText: password,
@@ -292,7 +316,7 @@ export const loginUser = async (req, res) => {
     algo: securityEnum.ARGON2,
   });
   if (!isPasswordValid) {
-    throw badRequest({ res, message: "Invalid password" });
+    throw badRequest({ message: "Invalid password" });
   }
   const credentials = await getNewLoginCredentials(user);
   return successResponse({
@@ -307,7 +331,7 @@ export const refreshToken = async (req, res) => {
   const user = req.user;
   const { jti, exp, sub } = req.decoded;
   if (exp * 1000 > Date.now() + 30000) {
-    throw badRequest({ res, message: "Refresh token is not expired" });
+    throw badRequest({ message: "Refresh token is not expired" });
   }
   await createRevokeToken(sub, jti, exp);
   const credentials = await getNewLoginCredentials(user);
@@ -346,7 +370,7 @@ export const googleLogin = async (req, res) => {
   const { email, given_name, family_name, email_verified, picture } =
     await verifyGoogle({ idToken });
   if (!email_verified) {
-    throw badRequest({ res, message: "Email not verified" });
+    throw badRequest({ message: "Email not verified" });
   }
   const user = await dbService.findOne({ model: userModel, filter: { email } });
   if (user) {
@@ -397,7 +421,6 @@ export const logoutUser = async (req, res) => {
     default:
       if (!jti) {
         throw badRequest({
-          res,
           message: "Invalid token: missing jti. Please login again.",
         });
       }
