@@ -23,3 +23,11 @@ export const loginSchema = {
     params: Joi.object({}),
     query: Joi.object({}),
 }
+export const confirmEmailSchema = {
+    body: Joi.object({
+        email: generalFields.email.required(),
+        otp: Joi.string().length(6).required(),
+    }),
+    params: Joi.object({}),
+    query: Joi.object({}),
+}

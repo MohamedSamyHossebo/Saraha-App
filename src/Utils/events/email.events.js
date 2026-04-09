@@ -19,6 +19,17 @@ emailEmitter.on("confirmEmail", async (data) => {
   });
 });
 
+emailEmitter.on("confirmEmailSuccess", async (data) => {
+  await sendEmail({
+    to: data.email,
+    subject: emailSubject.confirmEmailSuccess,
+    text: emailText.confirmEmailSuccess(data.name),
+    html: emailHTML.confirmEmailSuccess(data.name),
+  }).catch((err) => {
+    console.log(err);
+  });
+});
+
 emailEmitter.on("resetPassword", async (data) => {
   await sendEmail({
     to: data.email,

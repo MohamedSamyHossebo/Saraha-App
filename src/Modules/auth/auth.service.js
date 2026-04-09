@@ -20,13 +20,7 @@ import {
 import { OAuth2Client } from "google-auth-library";
 import { PROVIDER } from "../../Utils/enums/user.enum.js";
 import { keys, del, baseRevokeTokenKey } from "../../services/index.js";
-import {
-  sendEmail,
-  emailText,
-  emailSubject,
-  emailHTML,
-  emailAttachments,
-} from "../../Utils/email/mail.utils.js";
+
 import { emailEmitter } from "../../Utils/events/email.events.js";
 
 export const createUser = async (req, res) => {
@@ -45,7 +39,7 @@ export const createUser = async (req, res) => {
     plainText: password,
     algo: securityEnum.ARGON2,
   });
-  const otp = String(Math.floor(Math.random() * (900000 + 100000) + 100000));
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const hashedOtp = await generateHash({
     plainText: otp,
     algo: securityEnum.ARGON2,
@@ -77,7 +71,39 @@ export const createUser = async (req, res) => {
     data: user,
   });
 };
-
+export const confirmEmail = async (req, res) => {
+  const { email, otp } = req.body;
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: {
+      email,
+      confirmEmail: { $exists: false },
+      confirmEmailOtp: { $exists: true },
+    },
+  });
+  if (!user) {
+    throw notFound({ res, message: "User not found" });
+  }
+  const isOtpValid = await verifyHash({
+    plainText: otp,
+    cipherText: user.confirmEmailOtp,
+    algo: securityEnum.ARGON2,
+  });
+  if (!isOtpValid) {
+    throw badRequest({ res, message: "Invalid OTP" });
+  }
+  user.isActive = true;
+  user.confirmEmail = new Date().toISOString();
+  user.confirmEmailOtp = null;
+  await user.save();
+  emailEmitter.emit("confirmEmailSuccess", { email, name: user.firstName });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Email confirmed successfully",
+    data: user,
+  });
+};
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

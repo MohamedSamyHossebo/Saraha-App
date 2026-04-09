@@ -3,11 +3,12 @@ import * as authService from "./auth.service.js";
 import { authentication } from "../../Middlewares/auth.middleware.js";
 import { TOKEN_TYPE_ENUM } from "../../Utils/enums/user.enum.js";
 import { validationMiddleware } from "../../Middlewares/validation.middleware.js";
-import { signUpSchema, loginSchema } from "./auth.validation.js";
+import { signUpSchema, loginSchema, confirmEmailSchema } from "./auth.validation.js";
 import { localFileUpload } from "../../Middlewares/multer.middleware.js";
 const router = Router();
 
 router.post("/signup", localFileUpload().single("profileImage"), validationMiddleware(signUpSchema), authService.createUser)
+router.post("/confirm-email", validationMiddleware(confirmEmailSchema), authService.confirmEmail)
 router.post("/login", validationMiddleware(loginSchema), authService.loginUser)
 router.post("/logout", authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }), authService.logoutUser)
 router.post("/refresh-token", authentication({ tokenType: TOKEN_TYPE_ENUM.REFRESH }), authService.refreshToken)
