@@ -33,7 +33,8 @@ export async function sendEmail({
 export const emailSubject = {
   confirmEmail: "Confirm Your Email",
   confirmEmailSuccess: "Confirm Your Email Success",
-  resetPassword: "Reset Your Password",
+  forgetPassword: "Forget Password",
+  resetPassword: "Your Password Has Been Reset",
   welcome: "Welcome to Saraha App",
   contactUs: "Contact Us",
 };
@@ -71,11 +72,11 @@ export const emailHTML = {
       <p style="color: #718096; font-size: 14px; margin-bottom: 0;">If you didn't request this, you can safely ignore this email.</p>
     </div>
   `,
-  resetPassword: (otp) => `
+  forgetPassword: (otp) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1px solid #e1e4e8; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
       <div style="margin-bottom: 24px;">
-        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">Reset Your Password</h1>
-        <p style="color: #4a5568; font-size: 16px; margin-top: 12px;">We received a request to reset your password. Use the following code to proceed.</p>
+        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">Forget Password</h1>
+        <p style="color: #4a5568; font-size: 16px; margin-top: 12px;">We received a request to forget your password. Use the following code to proceed.</p>
       </div>
       
       <div style="margin: 32px 0;">
@@ -84,7 +85,23 @@ export const emailHTML = {
         </div>
       </div>
 
-      <p style="color: #718096; font-size: 14px; margin-bottom: 0;">This code is valid for a limited time. If you didn't request this change, please ignore this email.</p>
+      <p style="color: #718096; font-size: 14px; margin-bottom: 0;">If you didn't request this, you can safely ignore this email.</p>
+    </div>
+  `,
+  resetPassword: (name) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1px solid #e1e4e8; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+      <div style="margin-bottom: 24px;">
+        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">Your Password Has Been Reset</h1>
+        <p style="color: #4a5568; font-size: 16px; margin-top: 12px;">Your password has been reset successfully.</p>
+      </div>
+      
+      <div style="margin: 32px 0;">
+        <div style="display: inline-block; background: #000000; color: #ffffff; padding: 16px 32px; border-radius: 12px; font-size: 32px; font-weight: 700; letter-spacing: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          ${name}
+        </div>
+      </div>
+
+      <p style="color: #718096; font-size: 14px; margin-bottom: 0;"> If you didn't request this, please contact the support team.</p>
     </div>
   `,
   welcome: (name) => `
@@ -142,10 +159,18 @@ export const emailText = {
     
     If you didn't request this, you can safely ignore this email.
   `,
-  resetPassword: (otp) => `
-    Reset Your Password
+  resetPassword: (name) => `
+    Your Password Has Been Reset
     
-    We received a request to reset your password. Use the following code to proceed:
+    Hello ${name},
+    Your password has been reset successfully.
+    
+    If you didn't request this, you can safely ignore this email.
+  `,
+  forgetPassword: (otp) => `
+    Forget Password
+    
+    We received a request to forget your password. Use the following code to proceed:
     
     ${otp}
     
@@ -184,6 +209,12 @@ export const emailAttachments = {
     {
       filename: "reset-password.html",
       content: emailHTML.resetPassword(otp),
+    },
+  ],
+  forgetPassword: (otp) => [
+    {
+      filename: "forget-password.html",
+      content: emailHTML.forgetPassword(otp),
     },
   ],
   welcome: (name) => [

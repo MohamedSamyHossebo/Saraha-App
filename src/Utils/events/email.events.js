@@ -29,13 +29,22 @@ emailEmitter.on("confirmEmailSuccess", async (data) => {
     console.log(err);
   });
 });
-
+emailEmitter.on("forgetPassword", async (data) => {
+  await sendEmail({
+    to: data.email,
+    subject: emailSubject.forgetPassword,
+    text: emailText.forgetPassword(data.otp),
+    html: emailHTML.forgetPassword(data.otp),
+  }).catch((err) => {
+    console.log(err);
+  });
+});
 emailEmitter.on("resetPassword", async (data) => {
   await sendEmail({
     to: data.email,
     subject: emailSubject.resetPassword,
-    text: emailText.resetPassword(data.otp),
-    html: emailHTML.resetPassword(data.otp),
+    text: emailText.resetPassword(data.name),
+    html: emailHTML.resetPassword(data.name),
   }).catch((err) => {
     console.log(err);
   });

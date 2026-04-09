@@ -38,3 +38,13 @@ export const resendOtpSchema = {
     params: Joi.object({}),
     query: Joi.object({}),
 }
+export const resetPasswordSchema = {
+    body: Joi.object({
+        email: generalFields.email.required(),
+        otp: Joi.string().length(6).required(),
+        newPassword: generalFields.password.required(),
+        confirmPassword: generalFields.password.required(),
+    }),
+    params: Joi.object({}),
+    query: Joi.object({}),
+}

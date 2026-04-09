@@ -153,6 +153,79 @@ export const resendOtp = async (req, res) => {
     message: "OTP resent successfully check your email",
   });
 };
+//
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  const otp = generateOtp();
+  const hashedOtp = await generateHash({
+    plainText: otp,
+    algo: securityEnum.ARGON2,
+  });
+  const user = await dbService.findOneAndUpdate({
+    model: userModel,
+    filter: {
+      email,
+      confirmEmail: { $exists: true },
+      provider: PROVIDER.SYSTEM,
+    },
+    update: {
+      forgetPasswordOtp: hashedOtp,
+    },
+  });
+  if (!user) {
+    throw notFound({ res, message: "User not found" });
+  }
+  emailEmitter.emit("forgetPassword", { email, otp });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Check your email for the OTP",
+  });
+};
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword, confirmPassword } = req.body;
+  if (newPassword !== confirmPassword) {
+    throw badRequest({ res, message: "Passwords do not match" });
+  }
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: {
+      email,
+      confirmEmail: { $exists: true },
+      forgetPasswordOtp: { $exists: true },
+      provider: PROVIDER.SYSTEM,
+    },
+  });
+  if (!user) {
+    throw notFound({ res, message: "User not found" });
+  }
+  const isOtpValid = await verifyHash({
+    plainText: otp,
+    cipherText: user.forgetPasswordOtp,
+    algo: securityEnum.ARGON2,
+  });
+  if (!isOtpValid) {
+    throw badRequest({ res, message: "Invalid OTP" });
+  }
+  const hashedPassword = await generateHash({
+    plainText: newPassword,
+    algo: securityEnum.ARGON2,
+  });
+  await dbService.updateOne({
+    model: userModel,
+    filter: { email },
+    update: {
+      password: hashedPassword,
+      $unset: { forgetPasswordOtp: true },
+    },
+  });
+  emailEmitter.emit("resetPassword", { email, name: user.firstName });
+  return successResponse({
+    res,
+    statusCode: 200,
+    message: "Password reset successfully",
+  });
+};
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

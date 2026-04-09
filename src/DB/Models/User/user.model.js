@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema(
       default: PROVIDER.SYSTEM,
     },
     confirmEmailOtp:String,
+    forgetPasswordOtp:String,
     isActive:Boolean,
     confirmEmail: Date,
     changeCredentialsAt: Date,
