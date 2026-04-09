@@ -109,7 +109,13 @@ export const loginUser = async (req, res) => {
   if (!email || !password) {
     throw badRequest({ res, message: "Email and password are required" });
   }
-  const user = await dbService.findOne({ model: userModel, filter: { email } });
+  const user = await dbService.findOne({
+    model: userModel,
+    filter: { email, isActive: true, confirmEmail: { $exists: true } },
+  });
+  if (!user?.isActive) {
+    throw badRequest({ res, message: "Email not confirmed" });
+  }
   if (!user) {
     throw notFound({ res, message: "User not found" });
   }
