@@ -16,4 +16,10 @@ router.patch("/update-profile-picture",
     localFileUpload().single("profileImage"),
     userService.updateProfilePicture
 )
+router.patch("/update-cover-picture",
+    authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }),
+    authorization({ accessRoles: [ROLE.USER, ROLE.ADMIN] }),
+    localFileUpload().array("coverImage", 5),
+    userService.updateCoverPicture
+)
 export default router;
