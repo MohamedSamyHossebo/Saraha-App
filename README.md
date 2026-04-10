@@ -14,18 +14,28 @@ Welcome to the **Sara7a App**! Built with ❤️ during the **Node.js Learning P
 - **🖼️ Profile Management**: Upload your best selfie (thanks to Multer).
 - **🛡️ Validation**: Joi is watching every request like a hawk. 🦅
 - **⚡ Redis Integration**: Super-fast token blacklisting and caching.
-- **💎 Modern Stack**: ES6 Modules, Mongoose, and the latest Express features.
+- **📧 Email Notifications**: OTP and password reset emails via Nodemailer.
+- **🚦 Rate Limiting**: Protect your endpoints from abuse with Express Rate Limit.
+- **🪖 Security Headers**: Helmet keeps the bad guys out.
+- **📝 Request Logging**: Morgan logs every incoming request like a faithful reporter.
+- **🌍 CORS Support**: Cross-origin requests handled gracefully.
+- **💎 Modern Stack**: ES Modules, Mongoose, and the latest Express 5 features.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: [Node.js](https://nodejs.org/) & [Express.js](https://expressjs.com/)
-- **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
+- **Backend**: [Node.js](https://nodejs.org/) & [Express.js](https://expressjs.com/) v5
+- **Database**: [MongoDB](https://www.mongodb.com/) via [Mongoose](https://mongoosejs.com/) ODM
 - **Caching/State**: [Redis](https://redis.io/)
-- **Security**: [Argon2](https://github.com/ranisalt/node-argon2), [Bcrypt](https://github.com/kelektiv/node-bcrypt), [JWT](https://jwt.io/)
+- **Auth & Security**: [Argon2](https://github.com/ranisalt/node-argon2), [Bcrypt](https://github.com/kelektiv/node-bcrypt), [JWT](https://jwt.io/), [Helmet](https://helmetjs.github.io/), [CORS](https://github.com/expressjs/cors)
+- **Social Login**: [Google Auth Library](https://github.com/googleapis/google-auth-library-nodejs)
 - **Validation**: [Joi](https://joi.dev/)
 - **File Handling**: [Multer](https://github.com/expressjs/multer)
+- **Email**: [Nodemailer](https://nodemailer.com/)
+- **Rate Limiting**: [express-rate-limit](https://github.com/express-rate-limit/express-rate-limit)
+- **Logging**: [Morgan](https://github.com/expressjs/morgan)
+- **Config**: [dotenv](https://github.com/motdotla/dotenv)
 
 ---
 
@@ -68,10 +78,13 @@ Saraha-App/
    PORT=3000
    MONGO_URI=your_mongodb_uri
    JWT_SECRET=your_super_secret_key
+   JWT_REFRESH_SECRET=your_refresh_secret_key
    REDIS_HOST=127.0.0.1
    REDIS_PORT=6379
    GOOGLE_CLIENT_ID=your_google_id
    GOOGLE_CLIENT_SECRET=your_google_secret
+   EMAIL_USER=your_email@example.com
+   EMAIL_PASS=your_email_app_password
    ```
 
 4. **Run the app**:
