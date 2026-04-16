@@ -10,6 +10,9 @@ export const encrypt = async (data) => {
     return iv.toString('hex') + ':' + encrypted;
 }
 export const decrypt = async (data) => {
+    if (!data || typeof data !== 'string' || !data.includes(':')) {
+        return data;
+    }
     const [iv, encryptedData] = data.split(':');
     const binaryLike = Buffer.from(iv, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_SECRET_KEY), binaryLike);

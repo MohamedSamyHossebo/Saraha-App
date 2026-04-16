@@ -4,7 +4,9 @@ import * as dbService from "../../DB/database.repository.js";
 import userModel from "../../DB/Models/User/user.model.js";
 
 export const profile = async (req, res) => {
-  req.user.phoneNumber = await decrypt(req.user.phoneNumber);
+  if (req.user.phoneNumber) {
+    req.user.phoneNumber = await decrypt(req.user.phoneNumber);
+  }
 
   return successResponse({
     res,
