@@ -368,29 +368,16 @@ export const verifyGoogle = async ({ idToken }) => {
     idToken,
     audience: process.env.GOOGLE_CLIENT_ID,
   });
-  const payload = ticket.getPayload();
-  const { email, name } = payload;
-  let user = await dbService.findOne({ model: userModel, filter: { email } });
-  if (!user) {
-    user = await dbService.create({
-      model: userModel,
-      data: {
-        email,
-        firstName: name.split(" ")[0],
-        lastName: name.split(" ")[1],
-      },
-    });
-  }
-  return user;
+  return ticket.getPayload();
 };
 
 export const googleLogin = async (req, res) => {
   const { idToken } = req.body;
   const { email, given_name, family_name, email_verified, picture } =
     await verifyGoogle({ idToken });
-  if (!email_verified) {
-    throw badRequest({ message: "Email not verified" });
-  }
+  // if (!email_verified) {
+  //   throw badRequest({ message: "Email not verified" });
+  // }
   const user = await dbService.findOne({ model: userModel, filter: { email } });
   if (user) {
     if (user.provider === PROVIDER.GOOGLE) {
@@ -402,7 +389,7 @@ export const googleLogin = async (req, res) => {
         data: credentials,
       });
     }
-    throw badRequest({ res, message: "Email already registered" });
+    throw badRequest({ message: "Email already registered with a different provider" });
   }
   const newUser = await dbService.create({
     model: userModel,
@@ -413,6 +400,8 @@ export const googleLogin = async (req, res) => {
         lastName: family_name,
         profilePic: picture,
         provider: PROVIDER.GOOGLE,
+        confirmEmail: Date.now(),
+        isActive: true,
       },
     ],
   });
@@ -421,6 +410,37 @@ export const googleLogin = async (req, res) => {
     res,
     statusCode: 201,
     message: "User logged in successfully",
+    data: credentials,
+  });
+};
+export const googleSignUp = async (req, res) => {
+  const { idToken } = req.body;
+  const { email, given_name, family_name, picture } = await verifyGoogle({
+    idToken,
+  });
+  const user = await dbService.findOne({ model: userModel, filter: { email } });
+  if (user) {
+    throw badRequest({ message: "Email already registered" });
+  }
+  const newUser = await dbService.create({
+    model: userModel,
+    data: [
+      {
+        email,
+        firstName: given_name,
+        lastName: family_name,
+        profilePic: picture,
+        provider: PROVIDER.GOOGLE,
+        confirmEmail: Date.now(),
+        isActive: true,
+      },
+    ],
+  });
+  const credentials = await getNewLoginCredentials(newUser);
+  return successResponse({
+    res,
+    statusCode: 201,
+    message: "User signed up successfully",
     data: credentials,
   });
 };

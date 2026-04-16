@@ -23,16 +23,20 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider === PROVIDER.SYSTEM ? false : true;
+        return this.provider === PROVIDER.SYSTEM ? true : false;
       },
     },
     DOB: {
       type: Date,
-      required: [true, "Date of Birth is required"],
+      required: function () {
+        return this.provider === PROVIDER.SYSTEM ? true : false;
+      },
     },
     phoneNumber: {
       type: String,
-      required: [true, "Phone number is required"],
+      required: function () {
+        return this.provider === PROVIDER.SYSTEM ? true : false;
+      },
       // match: [/^\d{10}$/, "Please use a valid 10-digit phone number"]
     },
     gender: {

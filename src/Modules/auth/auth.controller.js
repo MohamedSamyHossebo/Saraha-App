@@ -67,6 +67,7 @@ router.post(
   authService.refreshToken,
 );
 router.post("/google-login", authService.googleLogin);
+router.post("/google-signup", authService.googleSignUp);
 router.delete(
   "/delete-account/:userId",
   authentication({ tokenType: TOKEN_TYPE_ENUM.ACCESS }),
