@@ -12,10 +12,17 @@ import morgan from "morgan";
 
 
 const bootstrap = async (app, express) => {
-  app.use(express.json(), cors(), helmet(),morgan("combined"));
+  app.use(
+    express.json(),
+    cors(),
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+    morgan("combined"),
+  );
   app.use(limiter)
   app.use(express.static("public"));
-  app.use("/uploads", express.static("./src/uploads"));
+  app.use("/uploads", express.static("uploads"));
   await connectDB();
   await connectRedis();
   app.get("/", (req, res) => {
